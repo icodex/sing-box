@@ -244,7 +244,7 @@ func (c *mieruPacketConn) WritePacket(buffer *buf.Buffer, destination M.Socksadd
 	common.Must(header.WriteZeroN(3))
 
 	var addr mierumodel.AddrSpec
-	if destination.IsFqdn() {
+	if destination.IsDomain() {
 		addr.FQDN = destination.Fqdn
 	} else {
 		addr.IP = destination.Addr.AsSlice()

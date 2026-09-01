@@ -1,9 +1,10 @@
 package tuic
 
 import (
-	"github.com/gofrs/uuid/v5"
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common/exceptions"
+
+	"github.com/gofrs/uuid/v5"
 )
 
 func (h *Inbound) UpdateUsers(users []option.TUICUser) error {
