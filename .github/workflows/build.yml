@@ -11,7 +11,7 @@ on:
         description: "Build type"
         required: true
         type: choice
-        default: "All"
+        default: "Binary"
         options:
           - All
           - Binary
@@ -91,29 +91,29 @@ jobs:
       max-parallel: 13
       matrix:
         include:
-          - { os: linux, arch: amd64, variant: purego, naive: true }
-          - { os: linux, arch: amd64, variant: glibc, naive: true }
-          - { os: linux, arch: amd64, variant: musl, naive: true, debian: amd64, rpm: x86_64, pacman: x86_64, alpine: x86_64, openwrt: "x86_64" }
+          - { os: linux, arch: amd64, variant: purego }
+          - { os: linux, arch: amd64, variant: glibc }
+          - { os: linux, arch: amd64, variant: musl, debian: amd64, rpm: x86_64, pacman: x86_64, alpine: x86_64, openwrt: "x86_64" }
 
-          - { os: linux, arch: arm64, variant: purego, naive: true }
-          - { os: linux, arch: arm64, variant: glibc, naive: true }
-          - { os: linux, arch: arm64, variant: musl, naive: true, debian: arm64, rpm: aarch64, pacman: aarch64, alpine: aarch64, openwrt: "aarch64_cortex-a53 aarch64_cortex-a72 aarch64_cortex-a76 aarch64_generic" }
+          - { os: linux, arch: arm64, variant: purego }
+          - { os: linux, arch: arm64, variant: glibc }
+          - { os: linux, arch: arm64, variant: musl, debian: arm64, rpm: aarch64, pacman: aarch64, alpine: aarch64, openwrt: "aarch64_cortex-a53 aarch64_cortex-a72 aarch64_cortex-a76 aarch64_generic" }
 
           - { os: linux, arch: "386", go386: sse2 }
-          - { os: linux, arch: "386", variant: glibc, naive: true, go386: sse2 }
-          - { os: linux, arch: "386", variant: musl, naive: true, go386: sse2, debian: i386, rpm: i386, alpine: x86, openwrt: "i386_pentium4" }
+          - { os: linux, arch: "386", variant: glibc, go386: sse2 }
+          - { os: linux, arch: "386", variant: musl, go386: sse2, debian: i386, rpm: i386, alpine: x86, openwrt: "i386_pentium4" }
 
           - { os: linux, arch: arm, goarm: "7" }
-          - { os: linux, arch: arm, variant: glibc, naive: true, goarm: "7" }
-          - { os: linux, arch: arm, variant: musl, naive: true, goarm: "7", debian: armhf, rpm: armv7hl, pacman: armv7hl, alpine: armv7, openwrt: "arm_cortex-a5_vfpv4 arm_cortex-a7_neon-vfpv4 arm_cortex-a7_vfpv4 arm_cortex-a8_vfpv3 arm_cortex-a9_neon arm_cortex-a9_vfpv3-d16 arm_cortex-a15_neon-vfpv4" }
+          - { os: linux, arch: arm, variant: glibc, goarm: "7" }
+          - { os: linux, arch: arm, variant: musl, goarm: "7", debian: armhf, rpm: armv7hl, pacman: armv7hl, alpine: armv7, openwrt: "arm_cortex-a5_vfpv4 arm_cortex-a7_neon-vfpv4 arm_cortex-a7_vfpv4 arm_cortex-a8_vfpv3 arm_cortex-a9_neon arm_cortex-a9_vfpv3-d16 arm_cortex-a15_neon-vfpv4" }
 
-          - { os: linux, arch: mipsle, gomips: hardfloat, naive: true, variant: glibc }
-          - { os: linux, arch: mipsle, gomips: softfloat, naive: true, variant: musl, debian: mipsel, rpm: mipsel, openwrt: "mipsel_24kc mipsel_74kc mipsel_mips32" }
-          - { os: linux, arch: mips64le, gomips: hardfloat, naive: true, variant: glibc, debian: mips64el, rpm: mips64el }
-          - { os: linux, arch: riscv64, naive: true, variant: glibc }
-          - { os: linux, arch: riscv64, naive: true, variant: musl, debian: riscv64, rpm: riscv64, alpine: riscv64, openwrt: "riscv64_generic" }
-          - { os: linux, arch: loong64, naive: true, variant: glibc }
-          - { os: linux, arch: loong64, naive: true, variant: musl, debian: loongarch64, rpm: loongarch64, alpine: loongarch64, openwrt: "loongarch64_generic" }
+          - { os: linux, arch: mipsle, gomips: hardfloat, variant: glibc }
+          - { os: linux, arch: mipsle, gomips: softfloat, variant: musl, debian: mipsel, rpm: mipsel, openwrt: "mipsel_24kc mipsel_74kc mipsel_mips32" }
+          - { os: linux, arch: mips64le, gomips: hardfloat, variant: glibc, debian: mips64el, rpm: mips64el }
+          - { os: linux, arch: riscv64, variant: glibc }
+          - { os: linux, arch: riscv64, variant: musl, debian: riscv64, rpm: riscv64, alpine: riscv64, openwrt: "riscv64_generic" }
+          - { os: linux, arch: loong64, variant: glibc }
+          - { os: linux, arch: loong64, variant: musl, debian: loongarch64, rpm: loongarch64, alpine: loongarch64, openwrt: "loongarch64_generic" }
 
           - { os: linux, arch: "386", go386: softfloat, openwrt: "i386_pentium-mmx" }
           - { os: linux, arch: arm, goarm: "5", openwrt: "arm_arm926ej-s arm_cortex-a7 arm_cortex-a9 arm_fa526 arm_xscale" }
@@ -367,11 +367,11 @@ jobs:
             -p "dist/sing-box_${{ needs.calculate_version.outputs.version }}_${{ matrix.os }}_${{ matrix.debian }}.deb" \
             --architecture ${{ matrix.debian }} \
             dist/sing-box=/usr/bin/sing-box
-          rm -rf $HOME/.gnupg
-          gpg --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" --import <<EOF
-          ${{ secrets.GPG_KEY }}
-          EOF
-          debsigs --sign=origin -k ${{ secrets.GPG_KEY_ID }} --gpgopts '--pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}"' dist/*.deb
+          # rm -rf $HOME/.gnupg
+          # gpg --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" --import <<EOF
+          # ${{ secrets.GPG_KEY }}
+          # EOF
+          # debsigs --sign=origin -k ${{ secrets.GPG_KEY_ID }} --gpgopts '--pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}"' dist/*.deb
       - name: Package RPM
         if: matrix.rpm != ''
         run: |-
@@ -384,14 +384,14 @@ jobs:
             -p "dist/sing-box_${{ needs.calculate_version.outputs.version }}_${{ matrix.os }}_${{ matrix.rpm }}.rpm" \
             --architecture ${{ matrix.rpm }} \
             dist/sing-box=/usr/bin/sing-box
-          cat > $HOME/.rpmmacros <<EOF
-          %_gpg_name ${{ secrets.GPG_KEY_ID }}
-          %_gpg_sign_cmd_extra_args --pinentry-mode loopback --passphrase ${{ secrets.GPG_PASSPHRASE }}
-          EOF
-          gpg --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" --import <<EOF
-          ${{ secrets.GPG_KEY }}
-          EOF
-          rpmsign --addsign dist/*.rpm
+          # cat > $HOME/.rpmmacros <<EOF
+          # %_gpg_name ${{ secrets.GPG_KEY_ID }}
+          # %_gpg_sign_cmd_extra_args --pinentry-mode loopback --passphrase ${{ secrets.GPG_PASSPHRASE }}
+          # EOF
+          # gpg --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" --import <<EOF
+          # ${{ secrets.GPG_KEY }}
+          # EOF
+          # rpmsign --addsign dist/*.rpm
       - name: Package Pacman
         if: matrix.pacman != ''
         run: |-
@@ -578,9 +578,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - { arch: amd64, naive: true }
+          - { arch: amd64 }
           - { arch: "386" }
-          - { arch: arm64, naive: true }
+          - { arch: arm64 }
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
@@ -1188,6 +1188,7 @@ jobs:
           GOARM: ${{ matrix.go_arm }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup package signing
+        if: false
         run: |-
           set -euo pipefail
           SIGNING_GNUPG_HOME="$RUNNER_TEMP/package-signing-gnupg"
@@ -1214,6 +1215,7 @@ jobs:
           GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Sign Linux packages
+        if: false
         run: |-
           set -euo pipefail
           debsigs \
