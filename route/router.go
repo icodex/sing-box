@@ -348,7 +348,9 @@ func (r *Router) UpdateRules(rules []option.Rule, ruleSets []option.RuleSet) err
 			_ = oldRuleSetUpdater.Close()
 		}
 		r.ruleSetUpdater = R.NewRuleSetUpdater(r.ctx, r.ruleSets)
-		r.ruleSetUpdater.Start()
+		if r.ruleSetUpdater != nil {
+			r.ruleSetUpdater.Start()
+		}
 
 		r.network.Initialize(r.ruleSets)
 
