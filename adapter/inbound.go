@@ -52,6 +52,10 @@ type InboundManager interface {
 	Inbounds() []Inbound
 	Get(tag string) (Inbound, bool)
 	Create(ctx context.Context, router Router, logger log.ContextLogger, tag string, inboundType string, options any) error
+	// Remove and Close are compatibility shims for hosts that hot-swap
+	// inbounds. Force-closing the whole box remains the fallback.
+	Remove(tag string) error
+	Close() error
 }
 
 type InboundContext struct {

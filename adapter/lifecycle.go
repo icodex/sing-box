@@ -125,6 +125,22 @@ func (s *Scope) Start(name string, component Lifecycle, stage StartStage) error 
 	return nil
 }
 
+// CloseChild closes and detaches one child component's scope without closing
+// the parent scope. Used by managers that support removing a component at
+// runtime; a later parent Close is still safe (the child is already closed).
+func (s *Scope) CloseChild(component Lifecycle) error {
+	s.access.Lock()
+	child, loaded := s.children[component]
+	if loaded {
+		delete(s.children, component)
+	}
+	s.access.Unlock()
+	if !loaded {
+		return nil
+	}
+	return child.Close()
+}
+
 func (s *Scope) Close() error {
 	s.access.Lock()
 	s.cancel()
