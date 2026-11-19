@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"runtime"
+	"sync/atomic"
 	"time"
 
 	"github.com/sagernet/sing-box/adapter"
@@ -37,6 +38,7 @@ type Router struct {
 	rules             []adapter.Rule
 	needFindProcess   bool
 	needFindNeighbor  bool
+	started           atomic.Bool
 	leaseFiles        []string
 	ruleSets          []adapter.RuleSet
 	ruleSetMap        map[string]adapter.RuleSet
@@ -217,6 +219,7 @@ func (r *Router) Start(stage adapter.StartStage, scope *adapter.Scope) error {
 		if r.ruleSetUpdater != nil {
 			r.ruleSetUpdater.Start()
 		}
+		r.started.Store(true)
 		return nil
 	case adapter.StartStateStarted:
 		for _, ruleSet := range r.ruleSets {
@@ -270,7 +273,7 @@ func (r *Router) UpdateRules(rules []option.Rule, ruleSets []option.RuleSet) err
 		}
 	}
 
-	if r.started {
+	if r.started.Load() {
 		var cacheContext *adapter.HTTPStartContext
 		if len(newRuleSets) > 0 {
 			cacheContext = adapter.NewHTTPStartContext()
@@ -315,7 +318,9 @@ func (r *Router) UpdateRules(rules []option.Rule, ruleSets []option.RuleSet) err
 			_ = oldRuleSetUpdater.Close()
 		}
 		r.ruleSetUpdater = R.NewRuleSetUpdater(r.ctx, r.ruleSets)
-		r.ruleSetUpdater.Start()
+		if r.ruleSetUpdater != nil {
+			r.ruleSetUpdater.Start()
+		}
 
 		r.network.Initialize(r.ruleSets)
 
